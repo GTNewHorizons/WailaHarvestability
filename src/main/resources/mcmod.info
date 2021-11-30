@@ -1,7 +1,7 @@
 [
 {
   "modid": "${modId}",
-  "name": "§{modName}",
+  "name": "${modName}",
   "description": "An add-on for Waila that adds information about the harvestability of what you are looking at",
   "version": "${modVersion}",
   "mcversion": "${minecraftVersion}",
