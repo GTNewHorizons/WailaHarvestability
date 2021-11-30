@@ -1,10 +1,10 @@
 [
 {
-  "modid": "WailaHarvestability",
-  "name": "Waila Harvestability",
+  "modid": "${modId}",
+  "name": "§{modName}",
   "description": "An add-on for Waila that adds information about the harvestability of what you are looking at",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
+  "version": "${modVersion}",
+  "mcversion": "${minecraftVersion}",
   "url": "",
   "updateUrl": "",
   "authorList": ["squeek"],
