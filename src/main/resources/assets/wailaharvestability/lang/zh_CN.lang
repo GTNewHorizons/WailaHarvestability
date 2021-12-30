@@ -28,3 +28,5 @@ option.harvestability.shearability=能否用剪刀采集
 option.harvestability.shearability.sneakingonly=仅潜行时显示: 能否用剪刀采集
 option.harvestability.silktouchability=能否精准采集
 option.harvestability.silktouchability.sneakingonly=仅潜行时显示: 能否精准采集
+option.harvestability.harvestlevelnum=采集等级
+option.harvestability.harvestlevelnum.sneakingonly=仅潜行时显示: 采集等级
