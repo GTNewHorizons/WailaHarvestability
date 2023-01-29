@@ -13,38 +13,42 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-@Mod(modid = ModInfo.MODID, name = ModInfo.MODNAME, version = ModInfo.VERSION, dependencies = "after:TConstruct;after:ExtraTiC;after:TSteelworks;after:Mariculture", acceptableRemoteVersions = "*")
-public class ModWailaHarvestability
-{
-	public static boolean hasIguanaTweaks;
+@Mod(
+        modid = ModInfo.MODID,
+        name = ModInfo.MODNAME,
+        version = ModInfo.VERSION,
+        dependencies = "after:TConstruct;after:ExtraTiC;after:TSteelworks;after:Mariculture",
+        acceptableRemoteVersions = "*")
+public class ModWailaHarvestability {
 
-	@SideOnly(Side.CLIENT)
-	@EventHandler
-	public void preInit(FMLPreInitializationEvent event)
-	{
-		Config.init(event.getSuggestedConfigurationFile());
+    public static boolean hasIguanaTweaks;
 
-		FMLInterModComms.sendMessage("VersionChecker", "addVersionCheck", "http://www.ryanliptak.com/minecraft/versionchecker/squeek502/WailaHarvestability");
-	}
+    @SideOnly(Side.CLIENT)
+    @EventHandler
+    public void preInit(FMLPreInitializationEvent event) {
+        Config.init(event.getSuggestedConfigurationFile());
 
-	@SideOnly(Side.CLIENT)
-	@EventHandler
-	public void init(FMLInitializationEvent event)
-	{
-		MissingHarvestInfo.init();
-		FMLInterModComms.sendMessage("Waila", "register", "squeek.wailaharvestability.WailaHandler.callbackRegister");
-	}
+        FMLInterModComms.sendMessage(
+                "VersionChecker",
+                "addVersionCheck",
+                "http://www.ryanliptak.com/minecraft/versionchecker/squeek502/WailaHarvestability");
+    }
 
-	@SideOnly(Side.CLIENT)
-	@EventHandler
-	public void postInit(FMLPostInitializationEvent event)
-	{
-		if (Loader.isModLoaded("IguanaTweaksTConstruct"))
-		{
-			hasIguanaTweaks = true;
-			ProxyIguanaTweaks.init();
-		}
+    @SideOnly(Side.CLIENT)
+    @EventHandler
+    public void init(FMLInitializationEvent event) {
+        MissingHarvestInfo.init();
+        FMLInterModComms.sendMessage("Waila", "register", "squeek.wailaharvestability.WailaHandler.callbackRegister");
+    }
 
-		ToolHelper.init();
-	}
+    @SideOnly(Side.CLIENT)
+    @EventHandler
+    public void postInit(FMLPostInitializationEvent event) {
+        if (Loader.isModLoaded("IguanaTweaksTConstruct")) {
+            hasIguanaTweaks = true;
+            ProxyIguanaTweaks.init();
+        }
+
+        ToolHelper.init();
+    }
 }
