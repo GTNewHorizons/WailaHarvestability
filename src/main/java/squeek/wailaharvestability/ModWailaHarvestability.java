@@ -1,8 +1,5 @@
 package squeek.wailaharvestability;
 
-import squeek.wailaharvestability.helpers.ToolHelper;
-import squeek.wailaharvestability.proxy.ProxyIguanaTweaks;
-import squeek.wailaharvestability.setup.MissingHarvestInfo;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -12,6 +9,9 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import squeek.wailaharvestability.helpers.ToolHelper;
+import squeek.wailaharvestability.proxy.ProxyIguanaTweaks;
+import squeek.wailaharvestability.setup.MissingHarvestInfo;
 
 @Mod(
         modid = ModInfo.MODID,
