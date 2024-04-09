@@ -1,6 +1,7 @@
 package squeek.wailaharvestability.proxy;
 
 import net.minecraft.block.Block;
+import net.minecraft.item.ItemStack;
 
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -26,5 +27,9 @@ public class ProxyGregTech {
 
     public static boolean isMachine(Block block) {
         return isModLoaded && GameRegistry.findUniqueIdentifierFor(block).toString().equals(machineUniqueIdentifier);
+    }
+
+    public static boolean isGTTool(ItemStack itemStack) {
+        return isModLoaded && itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("GT.ToolStats");
     }
 }

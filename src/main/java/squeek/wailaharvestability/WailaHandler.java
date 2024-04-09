@@ -148,16 +148,20 @@ public class WailaHandler implements IWailaDataProvider {
             boolean isEffective = false;
             boolean isAboveMinHarvestLevel = false;
             boolean isHoldingTinkersTool = false;
+            boolean isHoldingGTTool = false;
 
             ItemStack itemHeld = player.getHeldItem();
             if (itemHeld != null) {
                 isHoldingTinkersTool = ToolHelper.hasToolTag(itemHeld);
-                canHarvest = ToolHelper.canToolHarvestBlock(itemHeld, block, meta)
-                        || (!isHoldingTinkersTool && block.canHarvestBlock(player, meta));
+                isHoldingGTTool = ProxyGregTech.isGTTool(itemHeld);
                 isAboveMinHarvestLevel = (showCurrentlyHarvestable || showHarvestLevel)
                         && ToolHelper.canToolHarvestLevel(itemHeld, block, meta, harvestLevel);
                 isEffective = showEffectiveTool
                         && ToolHelper.isToolEffectiveAgainst(itemHeld, block, meta, effectiveTool);
+                if (isHoldingGTTool) canHarvest = itemHeld.func_150998_b(block);// GT tool don't care
+                                                                                // net.minecraft.block.material.Material#isToolNotRequired
+                else canHarvest = ToolHelper.canToolHarvestBlock(itemHeld, block, meta)
+                        || (!isHoldingTinkersTool && block.canHarvestBlock(player, meta));
             }
 
             boolean isCurrentlyHarvestable = (canHarvest && isAboveMinHarvestLevel)
@@ -261,6 +265,7 @@ public class WailaHandler implements IWailaDataProvider {
     }
 
     public static HashMap<String, Boolean> configOptions = new HashMap<String, Boolean>();
+
     static {
         configOptions.put("harvestability.harvestlevel", true);
         configOptions.put("harvestability.harvestlevelnum", false);
