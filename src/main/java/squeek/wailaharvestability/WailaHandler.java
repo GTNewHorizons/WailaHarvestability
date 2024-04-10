@@ -158,10 +158,13 @@ public class WailaHandler implements IWailaDataProvider {
                         && ToolHelper.canToolHarvestLevel(itemHeld, block, meta, harvestLevel);
                 isEffective = showEffectiveTool
                         && ToolHelper.isToolEffectiveAgainst(itemHeld, block, meta, effectiveTool);
-                if (isHoldingGTTool) canHarvest = itemHeld.func_150998_b(block);// GT tool don't care
-                                                                                // net.minecraft.block.material.Material#isToolNotRequired
-                else canHarvest = ToolHelper.canToolHarvestBlock(itemHeld, block, meta)
-                        || (!isHoldingTinkersTool && block.canHarvestBlock(player, meta));
+                if (isHoldingGTTool) {
+                    // GT tool don't care net.minecraft.block.material.Material#isToolNotRequired
+                    canHarvest = itemHeld.func_150998_b(block);
+                } else {
+                    canHarvest = ToolHelper.canToolHarvestBlock(itemHeld, block, meta)
+                            || (!isHoldingTinkersTool && block.canHarvestBlock(player, meta));
+                }
             }
 
             boolean isCurrentlyHarvestable = (canHarvest && isAboveMinHarvestLevel)
