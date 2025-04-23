@@ -17,7 +17,7 @@ public class ProxyGregTech {
     public static final String casingUniqueIdentifier = modID + ":" + casingID;
     public static final String machineID = "gt.blockmachines";
     public static final String machineUniqueIdentifier = modID + ":" + machineID;
-    public static boolean isModLoaded = Loader.isModLoaded(modID);
+    public static boolean isModLoaded = Loader.isModLoaded(modID) && !Loader.isModLoaded("gregapi");
 
     /**
      * Use a nested class so that ProxyGregTech can load without loading GTMethods. This allows us to keep GTUTIL_IS_ORE
