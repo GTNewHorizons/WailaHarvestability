@@ -60,18 +60,21 @@ public class WailaHandler implements IWailaDataProvider {
 
         EntityPlayer player = accessor.getPlayer();
 
+        boolean capMeta = true;
+
         // for disguised blocks
         if (itemStack.getItem() instanceof ItemBlock && !ProxyGregTech.isOreBlock(block, meta)
                 && !ProxyGregTech.isCasing(block)
                 && !ProxyGregTech.isMachine(block)) {
             block = Block.getBlockFromItem(itemStack.getItem());
             meta = itemStack.getItemDamage();
+            capMeta = false;
         }
 
         boolean minimalLayout = config.getConfig("harvestability.minimal", false);
 
-        List<String> stringParts = new ArrayList<String>();
-        getHarvestability(stringParts, player, block, meta, accessor.getPosition(), config, minimalLayout);
+        List<String> stringParts = new ArrayList<>();
+        getHarvestability(stringParts, player, block, meta, accessor.getPosition(), config, minimalLayout, capMeta);
 
         if (!stringParts.isEmpty()) {
             if (minimalLayout) toolTip.add(
@@ -85,7 +88,7 @@ public class WailaHandler implements IWailaDataProvider {
     }
 
     public void getHarvestability(List<String> stringList, EntityPlayer player, Block block, int meta,
-            MovingObjectPosition position, IWailaConfigHandler config, boolean minimalLayout) {
+            MovingObjectPosition position, IWailaConfigHandler config, boolean minimalLayout, boolean capMeta) {
         boolean isSneaking = player.isSneaking();
         boolean showHarvestLevel = config.getConfig("harvestability.harvestlevel")
                 && (!config.getConfig("harvestability.harvestlevel.sneakingonly") || isSneaking);
@@ -122,7 +125,7 @@ public class WailaHandler implements IWailaDataProvider {
 
             // needed to stop array index out of bounds exceptions on mob spawners
             // block.getHarvestLevel/getHarvestTool are only 16 elements big
-            if (meta >= 16) meta = 0;
+            if (meta >= 16 && capMeta) meta = 0;
 
             int harvestLevel = block.getHarvestLevel(meta);
             String effectiveTool = BlockHelper.getEffectiveToolOf(
