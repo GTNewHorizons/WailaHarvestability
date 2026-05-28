@@ -62,13 +62,15 @@ public class WailaHandler implements IWailaDataProvider {
 
         boolean capMeta = true;
 
-        // for disguised blocks
-        if (itemStack.getItem() instanceof ItemBlock && !ProxyGregTech.isOreBlock(block, meta)
-                && !ProxyGregTech.isCasing(block)
-                && !ProxyGregTech.isMachine(block)) {
-            block = Block.getBlockFromItem(itemStack.getItem());
-            meta = itemStack.getItemDamage();
-            capMeta = false;
+        boolean isGtBlock = ProxyGregTech.isRelevantGTBlock(block);
+        if (itemStack.getItem() instanceof ItemBlock) {
+            if (isGtBlock) {
+                capMeta = false;
+            } else {
+                // for disguised blocks
+                block = Block.getBlockFromItem(itemStack.getItem());
+                meta = itemStack.getItemDamage();
+            }
         }
 
         boolean minimalLayout = config.getConfig("harvestability.minimal", false);
