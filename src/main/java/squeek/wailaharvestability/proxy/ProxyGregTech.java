@@ -20,7 +20,7 @@ public class ProxyGregTech {
     public static boolean isRelevantGTBlock(Block block) {
         if (!isModLoaded) return false;
         String blockId = GameRegistry.findUniqueIdentifierFor(block).toString();
-        return blockId.startsWith(oreUniqueIdentifier) || blockId.equals(casingUniqueIdentifier)
+        return blockId.startsWith(oreUniqueIdentifier) || blockId.startsWith(casingUniqueIdentifier)
                 || blockId.equals(machineUniqueIdentifier);
     }
 
