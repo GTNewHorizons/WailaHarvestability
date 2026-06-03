@@ -36,6 +36,7 @@ import squeek.wailaharvestability.helpers.StringHelper;
 import squeek.wailaharvestability.helpers.ToolHelper;
 import squeek.wailaharvestability.proxy.ProxyCreativeBlocks;
 import squeek.wailaharvestability.proxy.ProxyGregTech;
+import squeek.wailaharvestability.proxy.ProxyGregTech.GTBlockType;
 
 public class WailaHandler implements IWailaDataProvider {
 
@@ -60,14 +61,23 @@ public class WailaHandler implements IWailaDataProvider {
 
         EntityPlayer player = accessor.getPlayer();
 
+        // If we should limit the block metadata to 15
         boolean capMeta = true;
 
-        // for disguised blocks
-        if (itemStack.getItem() instanceof ItemBlock && !ProxyGregTech.isOreBlock(block, meta)
-                && !ProxyGregTech.isCasing(block)
-                && !ProxyGregTech.isMachine(block)) {
-            block = Block.getBlockFromItem(itemStack.getItem());
-            meta = itemStack.getItemDamage();
+        GTBlockType gtBlockType = ProxyGregTech.getGTBlockType(block);
+        if (itemStack.getItem() instanceof ItemBlock) {
+            // Use the actual block we are looking at for GT casings and machines since that determines
+            // the mining level needed
+            if (gtBlockType != GTBlockType.Casing && gtBlockType != GTBlockType.Machine) {
+                // Use the mining level of what the block is "saying" it is in the case that the block
+                // is hiding what it actually is
+                block = Block.getBlockFromItem(itemStack.getItem());
+                meta = itemStack.getItemDamage();
+            }
+        }
+
+        // GT ores can go over the normal meta cap
+        if (gtBlockType == GTBlockType.Ore) {
             capMeta = false;
         }
 
