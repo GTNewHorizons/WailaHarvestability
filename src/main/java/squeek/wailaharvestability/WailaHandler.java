@@ -21,7 +21,6 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IShearable;
 
 import mcp.mobius.waila.api.IWailaConfigHandler;
@@ -145,8 +144,9 @@ public class WailaHandler implements IWailaDataProvider {
                     position.blockZ,
                     block,
                     meta);
-            if (effectiveTool != null && harvestLevel < 0) harvestLevel = 0;
-            boolean blockHasEffectiveTools = harvestLevel >= 0 && effectiveTool != null;
+            if (effectiveTool == null) effectiveTool = "noTool";
+            if (!effectiveTool.equals("noTool") && harvestLevel < 0) harvestLevel = 0;
+            boolean blockHasEffectiveTools = harvestLevel >= 0 && !effectiveTool.equals("noTool");
 
             String shearability = getShearabilityString(player, block, meta, position, config);
             String silkTouchability = getSilkTouchabilityString(player, block, meta, position, config);
@@ -160,34 +160,30 @@ public class WailaHandler implements IWailaDataProvider {
             boolean canHarvest = false;
             boolean isEffective = false;
             boolean isAboveMinHarvestLevel = false;
-            boolean isHoldingTinkersTool = false;
             boolean isHoldingGTTool = false;
 
             ItemStack itemHeld = player.getHeldItem();
             if (itemHeld != null) {
-                isHoldingTinkersTool = ToolHelper.hasToolTag(itemHeld);
                 isHoldingGTTool = ProxyGregTech.isGTTool(itemHeld);
                 isAboveMinHarvestLevel = (showCurrentlyHarvestable || showHarvestLevel)
-                        && ToolHelper.canToolHarvestLevel(itemHeld, block, meta, harvestLevel);
-                isEffective = showEffectiveTool
-                        && ToolHelper.isToolEffectiveAgainst(itemHeld, block, meta, effectiveTool);
+                        && ToolHelper.canToolHarvestLevel(itemHeld, harvestLevel, effectiveTool);
                 if (isHoldingGTTool) {
-                    // GT tool don't care net.minecraft.block.material.Material#isToolNotRequired
-                    canHarvest = itemHeld.func_150998_b(block);
-                } else {
-                    canHarvest = ToolHelper.canToolHarvestBlock(itemHeld, block, meta)
-                            || (!isHoldingTinkersTool && block.canHarvestBlock(player, meta));
+                    isEffective = showEffectiveTool && ProxyGregTech.isToolEffective(itemHeld, effectiveTool);
+                    canHarvest = ProxyGregTech.canHarvestBlock(itemHeld, block, meta);
+                } else { // not a GT Tool
+                    isEffective = showEffectiveTool
+                            && ToolHelper.isToolEffectiveAgainst(itemHeld, block, meta, effectiveTool);
+                    canHarvest = ToolHelper.canToolHarvestBlock(player, itemHeld, block, meta, shearability);
                 }
+            } else { // empty hand
+                canHarvest = shearability.isEmpty() && block.getMaterial().isToolNotRequired();
             }
 
-            boolean isCurrentlyHarvestable = (canHarvest && isAboveMinHarvestLevel)
-                    || (!isHoldingTinkersTool && ForgeHooks.canHarvestBlock(block, player, meta));
-
-            if (hideWhileHarvestable && isCurrentlyHarvestable) return;
+            if (hideWhileHarvestable && canHarvest) return;
 
             String currentlyHarvestable = showCurrentlyHarvestable
-                    ? ColorHelper.getBooleanColor(isCurrentlyHarvestable)
-                            + (isCurrentlyHarvestable ? Config.CURRENTLY_HARVESTABLE_STRING
+                    ? ColorHelper.getBooleanColor(canHarvest)
+                            + (canHarvest ? Config.CURRENTLY_HARVESTABLE_STRING
                                     : Config.NOT_CURRENTLY_HARVESTABLE_STRING)
                             + (!minimalLayout
                                     ? EnumChatFormatting.RESET
@@ -211,9 +207,7 @@ public class WailaHandler implements IWailaDataProvider {
                 else effectiveToolString = effectiveTool.substring(0, 1).toUpperCase() + effectiveTool.substring(1);
                 stringList.add(
                         (!minimalLayout ? StatCollector.translateToLocal("wailaharvestability.effectivetool") : "")
-                                + ColorHelper.getBooleanColor(
-                                        isEffective && (!isHoldingTinkersTool || canHarvest),
-                                        isHoldingTinkersTool && isEffective && !canHarvest)
+                                + ColorHelper.getBooleanColor(isEffective)
                                 + effectiveToolString);
             }
             if (harvestLevel >= 1 && (showHarvestLevel || showHarvestLevelNum)) {
@@ -231,7 +225,7 @@ public class WailaHandler implements IWailaDataProvider {
 
                 stringList.add(
                         (!minimalLayout ? StatCollector.translateToLocal("wailaharvestability.harvestlevel") : "")
-                                + ColorHelper.getBooleanColor(isAboveMinHarvestLevel && canHarvest)
+                                + ColorHelper.getBooleanColor(isAboveMinHarvestLevel)
                                 + harvestLevelString);
             }
         }
@@ -246,11 +240,18 @@ public class WailaHandler implements IWailaDataProvider {
         if (showShearability && (block instanceof IShearable || block == Blocks.deadbush
                 || (block == Blocks.double_plant && block.getItemDropped(meta, new Random(), 0) == null))) {
             ItemStack itemHeld = player.getHeldItem();
-            boolean isHoldingShears = itemHeld != null && itemHeld.getItem() instanceof ItemShears;
-            boolean isShearable = isHoldingShears && ((IShearable) block)
-                    .isShearable(itemHeld, player.worldObj, position.blockX, position.blockY, position.blockZ);
-            return ColorHelper.getBooleanColor(isShearable, !isShearable && isHoldingShears)
-                    + Config.SHEARABILITY_STRING;
+            boolean isHoldingShears = false;
+            boolean isHoldingGTTool = ProxyGregTech.isGTTool(itemHeld);
+            if (isHoldingGTTool) {
+                List<String> aToolClassList = ProxyGregTech.getToolClassList(itemHeld);
+                isHoldingShears = aToolClassList.contains("shears");
+            } else {
+                isHoldingShears = itemHeld != null && itemHeld.getItem() instanceof ItemShears;
+            }
+            boolean isShearable = isHoldingShears && ((((IShearable) block)
+                    .isShearable(itemHeld, player.worldObj, position.blockX, position.blockY, position.blockZ))
+                    || block == Blocks.double_plant);
+            return ColorHelper.getBooleanColor(isShearable) + Config.SHEARABILITY_STRING;
         }
         return "";
     }
