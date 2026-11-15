@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemShears;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.ForgeHooks;
@@ -38,11 +40,14 @@ public class ToolHelper {
         }
     }
 
-    public static boolean hasToolTag(ItemStack itemStack) {
-        return itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("InfiTool");
+    public static boolean hasTinkerToolTag(ItemStack itemStack) {
+        if (itemStack != null) {
+            return itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("InfiTool");
+        }
+        return false;
     }
 
-    public static NBTTagCompound getToolTag(ItemStack tool) {
+    public static NBTTagCompound getTinkerToolTag(ItemStack tool) {
         NBTTagCompound tag = null;
         if (tool.hasTagCompound()) tag = tool.getTagCompound().getCompoundTag("InfiTool");
         return tag;
@@ -95,21 +100,32 @@ public class ToolHelper {
                         : tool.getItem().getDigSpeed(tool, block, metadata) > 1.5f);
     }
 
-    public static boolean canToolHarvestLevel(ItemStack tool, Block block, int metadata, int harvestLevel) {
-        boolean canTinkersToolHarvestBlock = false;
+    public static boolean canToolHarvestLevel(ItemStack tool, int harvestLevel, String effectiveTool) {
+        boolean canHarvestLevel = false;
 
-        NBTTagCompound toolTag = ToolHelper.getToolTag(tool);
-        if (toolTag != null) {
+        if (hasTinkerToolTag(tool)) {
+            NBTTagCompound toolTag = ToolHelper.getTinkerToolTag(tool);
             int toolHarvestLevel = Math
                     .max(ToolHelper.getPrimaryHarvestLevel(toolTag), ToolHelper.getSecondaryHarvestLevel(toolTag));
-            canTinkersToolHarvestBlock = toolHarvestLevel >= harvestLevel;
+            canHarvestLevel = toolHarvestLevel >= harvestLevel;
+        } else {
+            canHarvestLevel = tool.getItem().getHarvestLevel(tool, effectiveTool) >= harvestLevel;
         }
 
-        return canTinkersToolHarvestBlock || ForgeHooks.canToolHarvestBlock(block, metadata, tool);
+        return canHarvestLevel;
     }
 
-    public static boolean canToolHarvestBlock(ItemStack tool, Block block, int metadata) {
-        return block.getMaterial().isToolNotRequired() || tool.func_150998_b(block); // func_150998_b = canHarvestBlock
+    public static boolean canToolHarvestBlock(EntityPlayer player, ItemStack tool, Block block, int metadata,
+            String shearability) {
+        boolean isHoldingShears = tool.getItem() instanceof ItemShears;
+        boolean harvestable = false;
+        if (!shearability.isEmpty()) {
+            harvestable = isHoldingShears;
+            return harvestable;
+        }
+        harvestable = block.getMaterial().isToolNotRequired() || ForgeHooks.canToolHarvestBlock(block, metadata, tool)
+                || block.canHarvestBlock(player, metadata);
+        return harvestable;
     }
 
 }
